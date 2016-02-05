@@ -10,7 +10,7 @@
 #include<algorithm>
 #include <string>
 #include <deque>
-GameScene::GameScene():m_isSend(true),m_iSendPk(0),m_iState(0),
+GameScene::GameScene() :m_iMusic(0), m_isSend(true), m_iSendPk(0), m_iState(0),
 					   m_iCall(0),m_iCallTime(0),m_iOutCard(0),
 					   m_type(ERROR_CARD),m_isChiBang(true){
 	m_player = new Player();
@@ -70,7 +70,6 @@ bool GameScene::init(){
 	bool isRet = false;
 	do 
 	{
-		
 		srand((unsigned)time(NULL));//初始化随机种子
 		CC_BREAK_IF(!initBackGround());//初始化背景
 		CC_BREAK_IF(!createPokers());//创建扑克
@@ -102,15 +101,50 @@ void GameScene::onExit(){
 	CCLayer::onExit();
 }
 
+void GameScene::menuMusicCallback(Ref* pSender){
+	if (m_iMusic == 0){ 
+		m_iMusic = 1;
+		SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+	}else{
+		m_iMusic = 0;
+		SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+	}
+}
+
 //创建背景
 bool GameScene::initBackGround(){
 	bool isRet = false;
 	do 
 	{	
+		Size size = Director::sharedDirector()->getVisibleSize();
+
+		//背景音乐
+		SimpleAudioEngine::getInstance()->preloadBackgroundMusic("backgroundmusic.mp3");
+		SimpleAudioEngine::getInstance()->playBackgroundMusic("backgroundmusic.mp3", true);
+		m_iMusic = 1;
+
 		//创建背景并添加
-		CCSprite* bk = CCSprite::create("bk.png");
-		this->addChild(bk,0);
-		bk->setAnchorPoint(ccp(0,0));
+		CCSprite* bg = CCSprite::create("bg.png");
+		bg->setAnchorPoint(ccp(0, 0));
+		bg->setPosition(Vec2(0, 0));
+		bg->setContentSize(Size(size.width, size.height));
+		float spx = bg->getTextureRect().getMaxX();
+		float spy = bg->getTextureRect().getMaxY();
+		this->addChild(bg, 0);
+
+		//音乐按钮
+		MenuItemImage *pMusicItem = MenuItemImage::create(
+			"CloseNormal.png",
+			"CloseSelected.png",
+			CC_CALLBACK_1(GameScene::menuMusicCallback, this)
+			);
+		CC_BREAK_IF(!pMusicItem);
+		pMusicItem->setPosition(Vec2(20, size.height - 20));
+		Menu* pMenu1 = Menu::create(pMusicItem, NULL);
+		pMenu1->setPosition(Point::ZERO);
+		CC_BREAK_IF(!pMenu1);
+		this->addChild(pMenu1);
+		
 
 		isRet = true;
 	} while (0);
@@ -172,26 +206,26 @@ bool GameScene::createPokers(){
 bool GameScene::initPlayer(){
 	Size size = Director::getInstance()->getVisibleSize();
 	//设置主玩家的位置
-	m_player->setPoint(ccp(size.width/2,size.height/6));
+	m_player->setPoint(ccp(size.width/2,pkHeight));
 	m_player->setPlayerClass(0);
 	//设置电脑1的位置
-	m_npcOne->setPoint(ccp(65,504));
+	m_npcOne->setPoint(ccp(pkWidth, size.height - pkHeight));
 	m_npcOne->setPlayerClass(1);
 	//设置电脑2的位置
-	m_npcTwo->setPoint(ccp(735,504));
+	m_npcTwo->setPoint(ccp(size.width - pkWidth, size.height - pkHeight));
 	m_npcTwo->setPlayerClass(1);
 
 	//设置三张牌的位置
-	m_Three->setPoint(ccp(size.width/2,504));
+	m_Three->setPoint(ccp(size.width / 2, size.height - pkHeight));
 	m_Three->setPlayerClass(2);
 	//设置主玩家出牌的位置
-	m_playerOut->setPoint(ccp(size.width/2,size.height/6+106));
+	m_playerOut->setPoint(ccp(size.width / 2, pkHeight*2));
 	m_playerOut->setPlayerClass(3);
 	//设置电脑1玩家出牌位置
-	m_npcOneOut->setPoint(ccp(146,size.height/2+20));
+	m_npcOneOut->setPoint(ccp(pkWidth * 2, size.height - pkHeight));
 	m_npcOneOut->setPlayerClass(4);
 	//设置电脑2玩家出牌位置
-	m_npcTwoOut->setPoint(ccp(654,size.height/2+20));
+	m_npcTwoOut->setPoint(ccp(size.width - pkWidth * 2, size.height - pkHeight));
 	m_npcTwoOut->setPlayerClass(5);
 	return true;
 }

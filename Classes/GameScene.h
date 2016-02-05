@@ -2,9 +2,11 @@
 #include "cocos2d.h"
 #include "Global.h"
 #include "vector"
+#include "SimpleAudioEngine.h"
 class Poker;
 class Player;
 USING_NS_CC;
+using namespace CocosDenshion;
 //记数 排序出的牌用
 struct JiShu
 {
@@ -29,6 +31,7 @@ public:
 	virtual void onEnter();
 	virtual void onExit();
 private:
+	void menuMusicCallback(Ref* pSender);
 	bool initBackGround();//加载背景
 	bool initPlayer();//初始化玩家信息
 	bool initAnNiu();//初始化叫分按钮
@@ -83,6 +86,7 @@ private:
 public:
 	void PlayerOutPaiXu(CCArray* m_arrPlayerOut);//对出的牌进行排序
 private:
+	int m_iMusic;
 	CCArray* m_arrPokers;//所有的牌
 	CC_SYNTHESIZE(Player*,m_player,Player);//玩家
 	Player* m_npcOne;//电脑1
